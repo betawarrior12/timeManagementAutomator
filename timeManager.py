@@ -61,8 +61,8 @@ def commitHours(creds):
 
         # Call the Calendar API
         today= datetime.date.today()
-        timeStart = str(today) + "T00:00:00Z"
-        timeEnd = str(today) + "T23:59:59Z" # 'Z' indicates UTC time
+        timeStart = f"{str(today)}T00:00:00Z"
+        timeEnd = f"{str(today)}T23:59:59Z"
         print("Getting today's coding hours")
         events_result = service.events().list(calendarId=YOUR_CALENDAR_ID, timeMin=timeStart, timeMax=timeEnd, singleEvents=True, orderBy='startTime', timeZone=YOUR_TIMEZONE).execute()
         events = events_result.get('items', [])
@@ -96,21 +96,21 @@ def commitHours(creds):
         date = datetime.date.today()
 
         formatted_total_duration = total_duration.seconds/60/60
-        coding_hours = (date, 'CODING', formatted_total_duration) 
+        coding_hours = (date, 'CODING', formatted_total_duration)
         cur.execute("INSERT INTO hours VALUES(?, ?, ?);", coding_hours)
         conn.commit()
         print("Coding hours added to database successfully")
 
     except HttpError as error:
-        print('An error occurred: %s' % error)
+        print(f'An error occurred: {error}')
 
 # add calendar event from curret time for length of 'duration'
 def addEvent(creds, duration, description):
     start = datetime.datetime.utcnow()
-    
+
     end = datetime.datetime.utcnow() + datetime.timedelta(hours=int(duration))
-    start_formatted = start.isoformat() + 'Z'
-    end_formatted = end.isoformat() + 'Z'
+    start_formatted = f'{start.isoformat()}Z'
+    end_formatted = f'{end.isoformat()}Z'
 
     event = {
     'summary': description,
@@ -126,7 +126,7 @@ def addEvent(creds, duration, description):
 
     service = build('calendar', 'v3', credentials=creds)
     event = service.events().insert(calendarId=YOUR_CALENDAR_ID, body=event).execute()
-    print('Event created: %s' % (event.get('htmlLink')))
+    print(f"Event created: {event.get('htmlLink')}")
 
 def getHours(number_of_days):
 
@@ -138,7 +138,11 @@ def getHours(number_of_days):
     conn = sqlite3.connect('hours.db')
     cur = conn.cursor()
 
-    cur.execute(f"SELECT DATE, HOURS FROM hours WHERE DATE between ? AND ?", (seven_days_ago, today))
+    cur.execute(
+        "SELECT DATE, HOURS FROM hours WHERE DATE between ? AND ?",
+        (seven_days_ago, today),
+    )
+
 
     hours = cur.fetchall()
 

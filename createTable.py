@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect(f'hours.db')
+conn = sqlite3.connect('hours.db')
 cur = conn.cursor()
 print("Opened database successfully")
 
